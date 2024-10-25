@@ -6,13 +6,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/loyality7/dockerize-it/internal/detector"
 	"github.com/loyality7/dockerize-it/internal/generator"
 )
 
 func main() {
-	projectPath := flag.String("path", ".", "Path to the project directory")
+	// Use current directory as default
+	currentDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Error getting current directory: %v", err)
+	}
+
+	projectPath := flag.String("path", currentDir, "Path to the project directory")
 	flag.Parse()
 
 	absPath, err := filepath.Abs(*projectPath)
@@ -22,12 +29,16 @@ func main() {
 
 	fmt.Printf("Analyzing project at: %s\n", absPath)
 
+	// Analyze the project structure
+	structure := detector.AnalyzeStructure(absPath)
+
+	// Print file structure
+	fmt.Println("Project structure:")
+	printStructure(structure, 0)
+
 	// Detect the stack
 	stack := detector.DetectStack(absPath)
 	fmt.Printf("Detected stack: %s\n", stack)
-
-	// Analyze the project structure
-	structure := detector.AnalyzeStructure(absPath)
 
 	// Generate Dockerfile
 	dockerfileContent := generator.GenerateDockerfile(stack, structure)
@@ -46,4 +57,18 @@ func main() {
 		log.Fatalf("Error writing docker-compose.yml: %v", err)
 	}
 	fmt.Println("docker-compose.yml generated successfully.")
+}
+
+func printStructure(structure detector.ProjectStructure, level int) {
+	indent := strings.Repeat("  ", level)
+
+	fmt.Printf("%s%s\n", indent, filepath.Base(structure.RootDir))
+
+	for _, dir := range structure.Directories {
+		fmt.Printf("%s  %s/\n", indent, dir)
+	}
+
+	for _, file := range structure.Files {
+		fmt.Printf("%s  %s\n", indent, file)
+	}
 }

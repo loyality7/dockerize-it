@@ -2,7 +2,6 @@ package detector
 
 import (
 	"os"
-	"path/filepath"
 )
 
 type ProjectStructure struct {

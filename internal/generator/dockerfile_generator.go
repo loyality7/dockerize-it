@@ -1,7 +1,7 @@
 package generator
 
 import (
-	"github.com/yourusername/dockerize-it/internal/detector"
+	"github.com/loyality7/dockerize-it/internal/detector"
 )
 
 func GenerateDockerfile(stack string, structure detector.ProjectStructure) string {
