@@ -37,26 +37,26 @@ func main() {
 	printStructure(structure, 0)
 
 	// Detect the stack
-	stack := detector.DetectStack(absPath)
-	fmt.Printf("Detected stack: %s\n", stack)
+	stacks := detector.DetectStack(structure)
+	fmt.Printf("Detected stacks: %v\n", getStackNames(stacks))
 
 	// Generate Dockerfile
-	dockerfileContent := generator.GenerateDockerfile(stack, structure)
+	dockerfileContent := generator.GenerateDockerfile(stacks, structure)
 	dockerfilePath := filepath.Join(absPath, "Dockerfile")
 	err = os.WriteFile(dockerfilePath, []byte(dockerfileContent), 0644)
 	if err != nil {
 		log.Fatalf("Error writing Dockerfile: %v", err)
 	}
-	fmt.Println("Dockerfile generated successfully.")
+	fmt.Println("Dockerfile generated successfully in the root directory.")
 
 	// Generate docker-compose.yml
-	dockerComposeContent := generator.GenerateDockerCompose(stack, structure)
+	dockerComposeContent := generator.GenerateDockerCompose(stacks, structure)
 	dockerComposePath := filepath.Join(absPath, "docker-compose.yml")
 	err = os.WriteFile(dockerComposePath, []byte(dockerComposeContent), 0644)
 	if err != nil {
 		log.Fatalf("Error writing docker-compose.yml: %v", err)
 	}
-	fmt.Println("docker-compose.yml generated successfully.")
+	fmt.Println("docker-compose.yml generated successfully in the root directory.")
 }
 
 func printStructure(structure detector.ProjectStructure, level int) {
@@ -71,4 +71,12 @@ func printStructure(structure detector.ProjectStructure, level int) {
 	for _, file := range structure.Files {
 		fmt.Printf("%s  %s\n", indent, file)
 	}
+}
+
+func getStackNames(stacks []detector.Stack) []string {
+	names := make([]string, len(stacks))
+	for i, stack := range stacks {
+		names[i] = stack.Name
+	}
+	return names
 }
